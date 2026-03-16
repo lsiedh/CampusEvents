@@ -115,12 +115,18 @@ Primary exclusions:
 - classes and course sessions
 - closed internal meetings
 - student timetable items
-- stale events
+- events outside the current digest window
+- undated events
 - non-event announcements
 
 Special handling:
 
 - some campus-based institutes may publish both research seminars and internal notices; filters must distinguish the two
+
+Current digest window:
+
+- include events whose Singapore-local start date is the run date through seven days after the run date, inclusive
+- exclude events with no start datetime because they cannot be placed safely into the delivery window
 
 ### 6. Deduplication Layer
 
@@ -154,7 +160,7 @@ Suggested ranking factors:
 
 ### 8. Rendering Layer
 
-Render the final digest as markdown or HTML email content.
+Render the final digest as markdown plus email-ready plain text and HTML content.
 
 Digest sections should likely include:
 
@@ -172,6 +178,12 @@ Each item should show:
 - brief summary
 - original link
 
+Current rendering behavior:
+
+- persist the digest artifact as markdown under `runs/<run-date>/digest.md`
+- send email as multipart alternative with plain text fallback and rendered HTML body
+- display event times in Singapore time using `MM/DD/YY HH:MM` 24-hour formatting
+
 ### 9. Delivery Layer
 
 Send the digest through an email transport.
@@ -179,10 +191,12 @@ Send the digest through an email transport.
 Requirements:
 
 - environment-driven configuration
+- allow local development configuration from untracked `.env.local` or `.env` files without overriding already-exported environment variables
 - support a configured recipient list, with the initial digest recipient set to `erichill27@gmail.com`
 - dry-run mode
 - failure logging
 - deterministic subject line for the run date
+- HTML-capable delivery so email clients do not receive raw markdown
 
 ### 10. Automation Layer
 

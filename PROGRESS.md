@@ -33,6 +33,12 @@ Status:
 - the validated registry now disables the two NTU sources whose canonical URLs return HTTP 404, and it disables the currently Incapsula-blocked NUS HTML sources so recurring automation runs only against fetchable sources
 - the SBS and CEE NTU sources have now been corrected to working replacement URLs and re-enabled in the validated registry
 - direct checks against likely alternate machine-readable paths for the remaining inactive NUS HTML sources did not yield a fetchable replacement; the blocker remains upstream Incapsula access rather than parser coverage
+- the delivery path now sends rendered HTML email with plain-text fallback instead of raw markdown
+- rendered `When` values now display in Singapore-local `MM/DD/YY HH:MM` format
+- filtering now limits the digest to events from the run date through seven days later, inclusive, using Singapore-local dates and excluding undated events
+- the CLI now auto-loads SMTP configuration from untracked `.env.local` or `.env` files for local delivery runs
+- dry-run validation for `2026-03-17` succeeded against the current live safe source set and produced a digest with 12 deduped events in the one-week window
+- a tracked SMTP password placeholder mistake in `.env.example` was corrected and the leaked value was removed from GitHub history
 
 ## Milestones
 
@@ -42,8 +48,8 @@ Status:
 | 2 | Source inventory | In progress | High-confidence source list with parse strategy per source |
 | 3 | Normalization model | In progress | Unified event schema and parser outputs established |
 | 4 | Filtering and dedupe | In progress | Non-class filters and duplicate handling covered by tests |
-| 5 | Digest rendering | In progress | Deterministic digest output produced from normalized events |
-| 6 | Email delivery | In progress | Send path configured and tested with mocks |
+| 5 | Digest rendering | Completed | Deterministic digest output produced from normalized events |
+| 6 | Email delivery | In progress | Send path configured, HTML email supported, and local SMTP delivery validated |
 | 7 | Automation scheduling | Not started | Weekday 7:00 AM run configured |
 | 8 | Hardening | In progress | Logging, docs, and regression checks complete |
 
@@ -64,10 +70,12 @@ Status:
 - Decided that the default local test command for this workspace is `./.venv/bin/pytest`.
 - Decided to use source-specific live fetch paths when a registry source is JS-backed but still exposes a stable machine-readable endpoint, rather than scraping the shell page.
 - Decided to reduce the active NUS source set for automation until a documented alternate public feed exists for the Incapsula-blocked HTML pages.
+- Decided that digest delivery should use rendered HTML email with plain-text fallback while still saving markdown artifacts under `runs/`.
+- Decided that the delivery digest window should include only events from the run date through the next seven days, inclusive, based on Singapore-local dates.
+- Decided that local SMTP configuration should be loadable from untracked `.env.local` or `.env` files.
 
 ## Open Questions
 
-- Which email transport is most practical for the final delivery path?
 - Which event categories require custom exclusion rules to avoid class-like listings?
 - Which sources are public enough to rely on without authentication?
 - Which campus-based non-department organisations have stable event pages worth ingesting?
@@ -75,4 +83,4 @@ Status:
 
 ## Next Step
 
-Move forward with the current automation-safe source set unless a fetchable official replacement feed is identified for the remaining inactive NUS HTML sources.
+Commit and push the current local code changes that added `.env.local` loading, then configure the weekday 7:00 AM Singapore automation to run with the current automation-safe source set.

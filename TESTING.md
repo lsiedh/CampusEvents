@@ -60,7 +60,8 @@ Verification:
 
 - items that look like classes are excluded
 - seminars, lectures, sports, talks, performances, concerts, plays, exhibitions, and art displays are retained when public-facing
-- stale items are removed based on the run date
+- only events from the run date through seven days later are retained, using Singapore-local dates
+- undated items are excluded from delivery
 
 ### Phase 5: Deduplication
 
@@ -84,7 +85,13 @@ Verification:
 
 - transport is mocked
 - subject and payload are asserted
+- multipart plain-text and HTML payloads are asserted
 - failures raise clear errors and are logged
+
+Local delivery smoke check:
+
+- keep real SMTP secrets out of tracked files
+- prefer untracked `.env.local` for local SMTP configuration when testing actual delivery manually
 
 ### Phase 8: Automation
 
