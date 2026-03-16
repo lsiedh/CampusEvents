@@ -1,0 +1,6 @@
+Metadata-Version: 2.4
+Name: campus-events
+Version: 0.1.0
+Summary: Automation-safe campus events digest pipeline
+Requires-Python: >=3.12
+Requires-Dist: PyYAML>=6.0

@@ -1,0 +1,345 @@
+version: 1
+generated_on: 2026-03-16
+notes:
+  - This registry includes only sources currently marked validated in SOURCES.md.
+  - Discovery-only and candidate sources stay in SOURCES.md until they are promoted.
+sources:
+  - id: nus_coe_rss_directory
+    campus: NUS
+    organisation: NUS Calendar of Events
+    governance: university
+    url: https://myaces.nus.edu.sg/CoE/jsp/coeRss.jsp
+    source_kind: rss_directory
+    parser_family: nus_coe_rss_directory
+    fixture_slug: nus_coe_rss_directory
+    categories_hint:
+      - arts
+      - seminars
+      - exhibitions
+      - lectures
+      - sports
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: rsis_event_rss
+    campus: NTU
+    organisation: RSIS
+    governance: hosted_institute
+    url: http://www.rsis.edu.sg/feed/?post_type=event
+    source_kind: rss
+    parser_family: generic_rss
+    fixture_slug: rsis_event_rss
+    categories_hint:
+      - talks
+      - seminars
+      - conferences
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: nus_osa_events
+    campus: NUS
+    organisation: Office of Student Affairs
+    governance: university
+    url: https://osa.nus.edu.sg/events/
+    source_kind: html
+    parser_family: nus_osa_events
+    fixture_slug: nus_osa_events
+    categories_hint:
+      - arts
+      - sports
+      - public_events
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: nus_arts_festival
+    campus: NUS
+    organisation: NUS Arts Festival
+    governance: university
+    url: https://osa.nus.edu.sg/nusartsfestival/
+    source_kind: html
+    parser_family: nus_arts_festival
+    fixture_slug: nus_arts_festival
+    categories_hint:
+      - performances
+      - concerts
+      - plays
+      - festivals
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: nus_museum
+    campus: NUS
+    organisation: NUS Museum
+    governance: university
+    url: https://museum.nus.edu.sg/
+    source_kind: html
+    parser_family: museum_cards
+    fixture_slug: nus_museum
+    categories_hint:
+      - exhibitions
+      - gallery_events
+      - talks
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: nus_baba_house
+    campus: NUS
+    organisation: NUS Baba House
+    governance: university
+    url: https://babahouse.nus.edu.sg/
+    source_kind: html
+    parser_family: heritage_programmes
+    fixture_slug: nus_baba_house
+    categories_hint:
+      - exhibitions
+      - tours
+      - cultural_programmes
+    priority: medium
+    active: true
+    trust_level: validated
+
+  - id: nus_lkcnhm
+    campus: NUS
+    organisation: Lee Kong Chian Natural History Museum
+    governance: university
+    url: https://lkcnhm.nus.edu.sg/
+    source_kind: html
+    parser_family: museum_cards
+    fixture_slug: nus_lkcnhm
+    categories_hint:
+      - exhibitions
+      - tours
+      - workshops
+    priority: medium
+    active: true
+    trust_level: validated
+
+  - id: nus_fass_events
+    campus: NUS
+    organisation: FASS
+    governance: faculty
+    url: https://fass.nus.edu.sg/events
+    source_kind: html
+    parser_family: taxonomy_events
+    fixture_slug: nus_fass_events
+    categories_hint:
+      - talks
+      - workshops
+      - festivals
+    priority: medium
+    active: true
+    trust_level: validated
+
+  - id: nus_sph_events
+    campus: NUS
+    organisation: Saw Swee Hock School of Public Health
+    governance: school
+    url: https://sph.nus.edu.sg/events
+    source_kind: html
+    parser_family: detail_cards
+    fixture_slug: nus_sph_events
+    categories_hint:
+      - talks
+      - conferences
+      - seminars
+    priority: medium
+    active: true
+    trust_level: validated
+
+  - id: nus_math_events
+    campus: NUS
+    organisation: Department of Mathematics
+    governance: department
+    url: https://math.nus.edu.sg/events
+    source_kind: html
+    parser_family: series_and_conference_index
+    fixture_slug: nus_math_events
+    categories_hint:
+      - lectures
+      - conferences
+      - seminars
+    priority: medium
+    active: true
+    trust_level: validated
+
+  - id: nus_cqt_upcoming_events
+    campus: NUS
+    organisation: Centre for Quantum Technologies
+    governance: hosted_institute
+    url: https://www.cqt.sg/upcoming-events/
+    source_kind: html
+    parser_family: upcoming_events_listing
+    fixture_slug: nus_cqt_upcoming_events
+    categories_hint:
+      - talks
+      - workshops
+      - conferences
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: nus_mbi_seminar_series
+    campus: NUS
+    organisation: Mechanobiology Institute
+    governance: hosted_institute
+    url: https://www.mbi.nus.edu.sg/mbi-seminar-workshop-series/
+    source_kind: html
+    parser_family: seminar_series_listing
+    fixture_slug: nus_mbi_seminar_series
+    categories_hint:
+      - seminars
+      - workshops
+      - conferences
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: ntu_main_events
+    campus: NTU
+    organisation: NTU
+    governance: university
+    url: https://www.ntu.edu.sg/events
+    source_kind: html
+    parser_family: ntu_event_portal
+    fixture_slug: ntu_main_events
+    categories_hint:
+      - talks
+      - seminars
+      - campus_events
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: ntu_ias_events
+    campus: NTU
+    organisation: Institute of Advanced Studies
+    governance: institute
+    url: https://www.ntu.edu.sg/ias/events
+    source_kind: html
+    parser_family: ntu_event_detail_listing
+    fixture_slug: ntu_ias_events
+    categories_hint:
+      - lectures
+      - seminars
+      - conferences
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: ntu_museum_exhibitions
+    campus: NTU
+    organisation: NTU Museum
+    governance: university
+    url: https://www.ntu.edu.sg/life-at-ntu/museum/exhibitions
+    source_kind: html
+    parser_family: museum_listing
+    fixture_slug: ntu_museum_exhibitions
+    categories_hint:
+      - exhibitions
+      - workshops
+      - gallery_events
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: ntu_mae_events
+    campus: NTU
+    organisation: School of Mechanical and Aerospace Engineering
+    governance: school
+    url: https://www.ntu.edu.sg/mae/news-events/events
+    source_kind: html
+    parser_family: ntu_event_detail_listing
+    fixture_slug: ntu_mae_events
+    categories_hint:
+      - seminars
+      - lectures
+      - school_events
+    priority: medium
+    active: true
+    trust_level: validated
+
+  - id: ntu_cceb_seminars
+    campus: NTU
+    organisation: School of Chemistry, Chemical Engineering and Biotechnology
+    governance: school
+    url: https://www.ntu.edu.sg/cceb/news-and-events/seminars-and-lecture-series
+    source_kind: html
+    parser_family: seminar_hub
+    fixture_slug: ntu_cceb_seminars
+    categories_hint:
+      - seminars
+      - lecture_series
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: ntu_sbs_events
+    campus: NTU
+    organisation: School of Biological Sciences
+    governance: school
+    url: https://www.ntu.edu.sg/sbs/news-events/events
+    source_kind: html
+    parser_family: ntu_event_detail_listing
+    fixture_slug: ntu_sbs_events
+    categories_hint:
+      - seminars
+      - symposia
+      - workshops
+    priority: medium
+    active: true
+    trust_level: validated
+
+  - id: ntu_cee_events
+    campus: NTU
+    organisation: School of Civil and Environmental Engineering
+    governance: school
+    url: https://www.ntu.edu.sg/cee/news-and-events/events
+    source_kind: html
+    parser_family: ntu_event_detail_listing
+    fixture_slug: ntu_cee_events
+    categories_hint:
+      - distinguished_seminars
+      - lectures
+      - conferences
+    priority: medium
+    active: true
+    trust_level: validated
+
+  - id: ntu_scelse_all_events
+    campus: NTU
+    organisation: SCELSE
+    governance: hosted_institute
+    url: https://scelse.sg/news-events/all-events/
+    source_kind: html
+    parser_family: filtered_event_cards
+    fixture_slug: ntu_scelse_all_events
+    categories_hint:
+      - conferences
+      - seminars
+      - talks
+      - outreach
+      - webinars
+    priority: high
+    active: true
+    trust_level: validated
+
+  - id: ntu_erian_news_events
+    campus: NTU
+    organisation: ERI@N
+    governance: institute
+    url: https://www.ntu.edu.sg/erian/news-events
+    source_kind: html
+    parser_family: institute_news_events
+    fixture_slug: ntu_erian_news_events
+    categories_hint:
+      - talks
+      - seminars
+      - institute_events
+    priority: medium
+    active: true
+    trust_level: validated
