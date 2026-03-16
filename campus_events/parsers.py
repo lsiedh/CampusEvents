@@ -8,6 +8,8 @@ from email.utils import parsedate_to_datetime
 from html import unescape
 from xml.etree import ElementTree
 
+from bs4 import BeautifulSoup
+
 from campus_events.models import Event, SourceRecord
 
 
@@ -112,6 +114,7 @@ CARD_LAYOUT_SPECS = {
 
 
 def parse_source(source: SourceRecord, content: str) -> list[Event]:
+    _raise_if_access_blocked(content)
     if source.parser_family == "generic_rss":
         return parse_generic_rss(source, content)
     if source.parser_family == "nus_osa_events":
@@ -120,6 +123,15 @@ def parse_source(source: SourceRecord, content: str) -> list[Event]:
         return parse_museum_cards(source, content)
     if source.parser_family == "filtered_event_cards":
         return parse_filtered_event_cards(source, content)
+    if source.parser_family == "ntu_event_portal":
+        return parse_ntu_event_portal(source, content)
+    if source.parser_family == "ntu_event_detail_listing":
+        return parse_ntu_event_detail_listing(source, content)
+    if source.parser_family in {"seminar_hub", "institute_news_events"}:
+        if _looks_like_json_object(content):
+            return parse_ntu_event_portal(source, content)
+    if source.parser_family == "museum_listing":
+        return parse_museum_listing(source, content)
     if source.parser_family in CARD_LAYOUT_SPECS:
         return parse_card_layout(source, content, CARD_LAYOUT_SPECS[source.parser_family])
     if source.parser_family == "nus_coe_rss_directory":
@@ -309,6 +321,16 @@ def parse_museum_cards(source: SourceRecord, content: str) -> list[Event]:
 
 
 def parse_filtered_event_cards(source: SourceRecord, content: str) -> list[Event]:
+    if _looks_like_json_object(content):
+        try:
+            payload = json.loads(content)
+        except json.JSONDecodeError as exc:
+            raise ParseError(f"filtered_event_cards ajax payload is not valid json: {exc}") from exc
+        results_html = payload.get("results")
+        if not isinstance(results_html, str) or not results_html.strip():
+            raise ParseError("filtered_event_cards ajax payload has no results html")
+        return _parse_scelse_ajax_cards(source, results_html)
+
     cards = re.findall(
         r"<article\b[^>]*class=[\"'][^\"']*filtered-event-card[^\"']*[\"'][^>]*>(.*?)</article>",
         content,
@@ -349,6 +371,119 @@ def parse_filtered_event_cards(source: SourceRecord, content: str) -> list[Event
         )
     if not events:
         raise ParseError("filtered_event_cards entries did not yield any events")
+    return events
+
+
+def parse_ntu_event_portal(source: SourceRecord, content: str) -> list[Event]:
+    if _looks_like_json_object(content):
+        try:
+            payload = json.loads(content)
+        except json.JSONDecodeError as exc:
+            raise ParseError(f"ntu_event_portal payload is not valid json: {exc}") from exc
+        items = payload.get("items")
+        if not isinstance(items, list) or not items:
+            raise ParseError("ntu_event_portal payload has no items")
+        return _parse_ntu_event_portal_items(source, items)
+    return parse_card_layout(source, content, CARD_LAYOUT_SPECS[source.parser_family])
+
+
+def parse_ntu_event_detail_listing(source: SourceRecord, content: str) -> list[Event]:
+    if _looks_like_json_object(content):
+        return parse_ntu_event_portal(source, content)
+
+    soup = BeautifulSoup(content, "lxml")
+    cards = soup.select(".img-card")
+    if not cards:
+        return parse_card_layout(source, content, CARD_LAYOUT_SPECS[source.parser_family])
+
+    events: list[Event] = []
+    for card in cards:
+        calendar_button = card.select_one(".calendar-button")
+        title_node = card.select_one(".img-card__title")
+        if title_node is None:
+            continue
+        title = title_node.get_text(" ", strip=True)
+        subtitle_node = card.select_one(".img-card__subtitle")
+        tags = []
+        if subtitle_node is not None:
+            tags.append(subtitle_node.get_text(" ", strip=True))
+        venue_node = card.select_one(".location")
+        venue = venue_node.get_text(" ", strip=True) if venue_node is not None else ""
+        href_node = card.select_one("a[href]")
+        href = ""
+        if href_node is not None:
+            href = (href_node.get("href") or "").strip()
+        summary = ""
+        start = None
+        end = None
+        if calendar_button is not None:
+            summary = _clean_html_text(calendar_button.get("data-description", ""))
+            start = _parse_compact_or_date(calendar_button.get("data-start"))
+            end = _parse_compact_or_date(calendar_button.get("data-end"))
+            venue = venue or str(calendar_button.get("data-location") or "")
+        if not title:
+            continue
+        events.append(
+            Event(
+                title=title,
+                summary=summary,
+                start=start,
+                end=end,
+                timezone=_format_timezone(start),
+                venue=venue,
+                campus=source.campus,
+                institution=source.organisation,
+                organiser=source.organisation,
+                source_name=source.id,
+                source_url=href or source.url,
+                category=_category_from_tags(tags, source.categories_hint),
+                audience_hint="public",
+                tags=tags or source.categories_hint.copy(),
+            )
+        )
+    if not events:
+        raise ParseError("ntu_event_detail_listing cards did not yield any events")
+    return events
+
+
+def parse_museum_listing(source: SourceRecord, content: str) -> list[Event]:
+    if _looks_like_json_object(content):
+        return parse_ntu_event_portal(source, content)
+
+    soup = BeautifulSoup(content, "lxml")
+    cards = soup.select(".card-grids a.img-card")
+    if not cards:
+        return parse_card_layout(source, content, CARD_LAYOUT_SPECS[source.parser_family])
+
+    events: list[Event] = []
+    for card in cards:
+        title_node = card.select_one(".img-card__title")
+        if title_node is None:
+            continue
+        title = title_node.get_text(" ", strip=True)
+        href = (card.get("href") or "").strip()
+        summary_node = card.select_one(".img-card__desc")
+        summary = summary_node.get_text(" ", strip=True) if summary_node else ""
+        events.append(
+            Event(
+                title=title,
+                summary=summary,
+                start=None,
+                end=None,
+                timezone="",
+                venue="NTU Museum",
+                campus=source.campus,
+                institution=source.organisation,
+                organiser=source.organisation,
+                source_name=source.id,
+                source_url=href or source.url,
+                category=_category_from_tags(source.categories_hint, source.categories_hint),
+                audience_hint="public",
+                tags=source.categories_hint.copy(),
+            )
+        )
+    if not events:
+        raise ParseError("museum_listing cards did not yield any events")
     return events
 
 
@@ -484,6 +619,93 @@ def _event_from_json_ld(source: SourceRecord, item: dict[str, object]) -> Event:
     )
 
 
+def _parse_scelse_ajax_cards(source: SourceRecord, results_html: str) -> list[Event]:
+    soup = BeautifulSoup(results_html, "lxml")
+    blocks = soup.select(".team-wrapper")
+    if not blocks:
+        raise ParseError("filtered_event_cards ajax results have no team-wrapper cards")
+
+    events: list[Event] = []
+    for block in blocks:
+        title = _clean_html_text(str(block.find(["h1", "h2", "h3", "h4", "h5", "h6"]) or ""))
+        source_url = ""
+        link = block.find("a", href=True)
+        if link is not None:
+            source_url = unescape(link["href"].strip())
+        if not title:
+            continue
+        tag_node = block.select_one(".newsTag")
+        date_node = block.select_one(".newsPost_date")
+        tag_text = _clean_html_text(str(tag_node or ""))
+        date_text = _clean_html_text(str(date_node or ""))
+        start, venue = _parse_scelse_date_and_venue(date_text)
+        tags = [tag_text] if tag_text else []
+        events.append(
+            Event(
+                title=title,
+                summary="",
+                start=start,
+                end=None,
+                timezone=_format_timezone(start),
+                venue=venue,
+                campus=source.campus,
+                institution=source.organisation,
+                organiser=source.organisation,
+                source_name=source.id,
+                source_url=source_url or source.url,
+                category=_category_from_tags(tags, source.categories_hint),
+                audience_hint=_audience_hint_from_tags(tags),
+                tags=tags or source.categories_hint.copy(),
+            )
+        )
+    if not events:
+        raise ParseError("filtered_event_cards ajax results did not yield any events")
+    return events
+
+
+def _parse_ntu_event_portal_items(
+    source: SourceRecord,
+    items: list[object],
+) -> list[Event]:
+    events: list[Event] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        title = str(item.get("title") or "").strip()
+        if not title:
+            continue
+        description = str(item.get("description") or item.get("content") or "")
+        tag_text = str(item.get("tag") or "")
+        tags = [tag_text] if tag_text else []
+        start = _parse_compact_datetime(item.get("eventstart")) or _parse_dateish_datetime(
+            str(item.get("date") or "")
+        )
+        end = _parse_compact_datetime(item.get("eventend"))
+        venue = str(item.get("location") or "")
+        source_url = str(item.get("url") or source.url)
+        events.append(
+            Event(
+                title=title,
+                summary=description,
+                start=start,
+                end=end,
+                timezone=_format_timezone(start),
+                venue=venue,
+                campus=source.campus,
+                institution=source.organisation,
+                organiser=source.organisation,
+                source_name=source.id,
+                source_url=source_url,
+                category=_category_from_tags(tags, source.categories_hint),
+                audience_hint="public",
+                tags=tags or source.categories_hint.copy(),
+            )
+        )
+    if not events:
+        raise ParseError("ntu_event_portal items did not yield any events")
+    return events
+
+
 def _find_text(node: ElementTree.Element, *tags: str) -> str:
     for tag in tags:
         child = node.find(tag)
@@ -515,6 +737,19 @@ def _parse_iso_datetime(value: object) -> datetime | None:
     if parsed.tzinfo is None:
         return parsed.replace(tzinfo=UTC)
     return parsed
+
+
+def _parse_compact_datetime(value: object) -> datetime | None:
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        return datetime.strptime(value.strip(), "%Y%m%dT%H%M%S").replace(tzinfo=UTC)
+    except ValueError:
+        return None
+
+
+def _parse_compact_or_date(value: object) -> datetime | None:
+    return _parse_compact_datetime(value) or _parse_iso_datetime(value)
 
 
 def _parse_dateish_datetime(value: str) -> datetime | None:
@@ -562,6 +797,22 @@ def _extract_class_text(fragment: str, class_name: str) -> str:
     return _clean_html_text(match.group(1))
 
 
+def _extract_tag_class_text(fragment: str, tag_name: str, class_name: str) -> str:
+    pattern = (
+        r"<"
+        + re.escape(tag_name)
+        + r"\b[^>]*class=[\"'][^\"']*"
+        + re.escape(class_name)
+        + r"[^\"']*[\"'][^>]*>(.*?)</"
+        + re.escape(tag_name)
+        + r">"
+    )
+    match = re.search(pattern, fragment, flags=re.IGNORECASE | re.DOTALL)
+    if not match:
+        return ""
+    return _clean_html_text(match.group(1))
+
+
 def _extract_list_items(fragment: str, class_name: str) -> list[str]:
     pattern = (
         r"<ul\b[^>]*class=[\"'][^\"']*"
@@ -581,6 +832,58 @@ def _extract_list_items(fragment: str, class_name: str) -> list[str]:
 def _clean_html_text(value: str) -> str:
     stripped = re.sub(r"<[^>]+>", " ", value)
     return " ".join(unescape(stripped).split())
+
+
+def _extract_first_heading(fragment: str) -> str:
+    match = re.search(
+        r"<h[1-6][^>]*>(.*?)</h[1-6]>",
+        fragment,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    if not match:
+        return ""
+    return _clean_html_text(match.group(1))
+
+
+def _extract_preferred_link(fragment: str) -> str:
+    links = re.findall(
+        r'<a\b[^>]*href=["\']([^"\']+)["\'][^>]*>',
+        fragment,
+        flags=re.IGNORECASE | re.DOTALL,
+    )
+    for link in links:
+        cleaned = unescape(link.strip())
+        if cleaned and not cleaned.startswith("#"):
+            return cleaned
+    return ""
+
+
+def _parse_scelse_date_and_venue(value: str) -> tuple[datetime | None, str]:
+    if not value:
+        return None, ""
+    normalized = re.sub(r"\s+", " ", value).strip()
+    date_match = re.search(
+        r"([A-Za-z]+,\s+\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})",
+        normalized,
+    )
+    start = None
+    if date_match:
+        date_text = re.sub(r"^[A-Za-z]+,\s*", "", date_match.group(1))
+        start = _parse_dateish_datetime(date_text)
+    venue = ""
+    parts = [part.strip() for part in normalized.split(",") if part.strip()]
+    if len(parts) >= 4:
+        venue = ", ".join(parts[3:])
+    return start, venue
+
+
+def _looks_like_json_object(content: str) -> bool:
+    return content.lstrip().startswith("{")
+
+
+def _raise_if_access_blocked(content: str) -> None:
+    if "_Incapsula_Resource" in content or "Incapsula incident ID" in content:
+        raise ParseError("blocked by Incapsula challenge page")
 
 
 def _audience_hint_from_tags(tags: list[str]) -> str:

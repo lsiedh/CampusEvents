@@ -25,6 +25,14 @@ Status:
 - reusable `filtered_event_cards` parser family added for SCELSE-style institute listings, with representative fixture coverage and offline dry-run coverage across NTU and NUS sources
 - remaining validated HTML parser families now have representative saved fixtures and parser coverage, with an aggregate offline dry-run test spanning the implemented parser set
 - `nus_coe_rss_directory` now expands downstream RSS feeds in the pipeline, with representative directory and feed fixtures plus offline coverage for the expansion path
+- live-source fetch handling now includes the NTU events JSON endpoint and the SCELSE WordPress AJAX endpoint, so those two sources no longer depend on brittle placeholder HTML fixtures
+- live dry-run execution has been re-verified against the registry; Incapsula-blocked NUS pages are now logged explicitly as challenge-page failures rather than generic parser misses
+- timezone-aware event timestamps from live feeds exposed and fixed a dedupe sort bug caused by mixing aware event datetimes with a naive fallback sentinel
+- captured live NTU response snapshots are now stored under `tests/fixtures/` and covered by parser regression tests
+- additional NTU sources now use their native `GetEvents` feeds or live `img-card` listings, bringing IAS, MAE, CCEB, ERI@N, and NTU Museum into the successful live parse set
+- the validated registry now disables the two NTU sources whose canonical URLs return HTTP 404, and it disables the currently Incapsula-blocked NUS HTML sources so recurring automation runs only against fetchable sources
+- the SBS and CEE NTU sources have now been corrected to working replacement URLs and re-enabled in the validated registry
+- direct checks against likely alternate machine-readable paths for the remaining inactive NUS HTML sources did not yield a fetchable replacement; the blocker remains upstream Incapsula access rather than parser coverage
 
 ## Milestones
 
@@ -32,12 +40,12 @@ Status:
 | --- | --- | --- | --- |
 | 1 | Scaffolding | Completed | Core markdown files exist and reflect current understanding |
 | 2 | Source inventory | In progress | High-confidence source list with parse strategy per source |
-| 3 | Normalization model | Not started | Unified event schema and parser outputs established |
-| 4 | Filtering and dedupe | Not started | Non-class filters and duplicate handling covered by tests |
-| 5 | Digest rendering | Not started | Deterministic digest output produced from normalized events |
-| 6 | Email delivery | Not started | Send path configured and tested with mocks |
+| 3 | Normalization model | In progress | Unified event schema and parser outputs established |
+| 4 | Filtering and dedupe | In progress | Non-class filters and duplicate handling covered by tests |
+| 5 | Digest rendering | In progress | Deterministic digest output produced from normalized events |
+| 6 | Email delivery | In progress | Send path configured and tested with mocks |
 | 7 | Automation scheduling | Not started | Weekday 7:00 AM run configured |
-| 8 | Hardening | Not started | Logging, docs, and regression checks complete |
+| 8 | Hardening | In progress | Logging, docs, and regression checks complete |
 
 ## Decisions Log
 
@@ -54,16 +62,17 @@ Status:
 - Decided that the initial digest recipient should be `erichill27@gmail.com`.
 - Decided that automation-safe runs should always write a summary artifact and use a persisted delivery ledger before SMTP delivery.
 - Decided that the default local test command for this workspace is `./.venv/bin/pytest`.
+- Decided to use source-specific live fetch paths when a registry source is JS-backed but still exposes a stable machine-readable endpoint, rather than scraping the shell page.
+- Decided to reduce the active NUS source set for automation until a documented alternate public feed exists for the Incapsula-blocked HTML pages.
 
 ## Open Questions
 
 - Which email transport is most practical for the final delivery path?
-- Which NUS and NTU sources expose machine-readable feeds versus HTML-only pages?
 - Which event categories require custom exclusion rules to avoid class-like listings?
 - Which sources are public enough to rely on without authentication?
 - Which campus-based non-department organisations have stable event pages worth ingesting?
-- Which HTML source families need dedicated selectors beyond structured-data extraction?
+- Which remaining NTU HTML source families need dedicated live selectors beyond the representative fixture layouts?
 
 ## Next Step
 
-Capture raw Phase 1 fixtures from the validated registry to replace the representative samples, then decide whether the expanded NUS CoE downstream feeds should remain dynamic or be promoted into explicit registry records for clearer per-feed control.
+Move forward with the current automation-safe source set unless a fetchable official replacement feed is identified for the remaining inactive NUS HTML sources.

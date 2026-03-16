@@ -20,7 +20,12 @@ from campus_events.models import Event, RunReport, SourceAttempt
 from campus_events.parsers import ParseError, parse_source
 from campus_events.parsers import parse_nus_coe_rss_directory
 from campus_events.registry import load_registry
-from campus_events.render import digest_subject, render_digest
+from campus_events.render import (
+    digest_subject,
+    render_digest,
+    render_digest_html,
+    render_digest_text,
+)
 
 
 def default_run_date() -> date:
@@ -117,8 +122,12 @@ def run_pipeline(
     output_dir = ensure_directory(Path(output_root) / run_date.isoformat())
     digest_path: Path | None = None
     digest_body = ""
+    digest_text_body = ""
+    digest_html_body = ""
     if deduped_events:
         digest_body = render_digest(deduped_events, run_date)
+        digest_text_body = render_digest_text(deduped_events, run_date)
+        digest_html_body = render_digest_html(deduped_events, run_date)
         digest_path = output_dir / "digest.md"
         digest_path.write_text(digest_body, encoding="utf-8")
 
@@ -134,7 +143,13 @@ def run_pipeline(
         status = "dry_run_valid"
     else:
         try:
-            send_via_smtp(load_delivery_config(), recipient, subject, digest_body)
+            send_via_smtp(
+                load_delivery_config(),
+                recipient,
+                subject,
+                digest_text_body,
+                html_body=digest_html_body,
+            )
         except Exception as exc:
             delivery_error = str(exc)
             status = "blocked_delivery"

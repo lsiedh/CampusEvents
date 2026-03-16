@@ -51,6 +51,7 @@ def send_via_smtp(
     recipient: str,
     subject: str,
     body: str,
+    html_body: str | None = None,
 ) -> None:
     if not config.configured:
         missing = ", ".join(config.missing_fields())
@@ -61,10 +62,11 @@ def send_via_smtp(
     message["To"] = recipient
     message["Subject"] = subject
     message.set_content(body)
+    if html_body:
+        message.add_alternative(html_body, subtype="html")
 
     with smtplib.SMTP(config.smtp_host, config.smtp_port, timeout=30) as smtp:
         if config.smtp_starttls:
             smtp.starttls()
         smtp.login(config.smtp_username, config.smtp_password)
         smtp.send_message(message)
-

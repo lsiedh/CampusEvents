@@ -35,7 +35,7 @@ Statuses used in this document:
 | `https://science.nus.edu.sg/events` | HTML portal | candidate | Search results show valid science event pages, but the canonical listing appears fragmented across subpages rather than one stable index |
 | `https://chemistry.nus.edu.sg/events` | HTML portal | candidate | Live events page exists, but it is mostly outreach, olympiad, camp, and open-house information rather than a broad ongoing seminar feed |
 | `https://physics.nus.edu.sg/events` | HTML portal | candidate | Physics publishes event detail pages, but a stable all-events index still needs confirmation |
-| `https://math.nus.edu.sg/events` | HTML portal | validated | Mathematics publishes event-series and conference pages under a stable events section |
+| `https://math.nus.edu.sg/events` | HTML portal | validated | Mathematics publishes event-series and conference pages under a stable events section; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
 | `https://ims.nus.edu.sg/events` | HTML portal | candidate | Institute events |
 | `https://stat.nus.edu.sg/events` | HTML portal | candidate | Department events |
 | `https://cde.nus.edu.sg/events` | HTML portal | candidate | College-level event listing |
@@ -45,9 +45,9 @@ Statuses used in this document:
 | `https://bschool.nus.edu.sg/news-events/events` | HTML portal | candidate | Business school events |
 | `https://law.nus.edu.sg/events` | HTML portal | candidate | Event pages exist, but many visible results are old or invitation-only; needs a pass to determine current usefulness |
 | `https://ystmusic.nus.edu.sg/whats-on` | HTML portal | candidate | Concerts and public performances |
-| `https://fass.nus.edu.sg/events` | HTML portal | validated | Live event taxonomy pages expose dated talks, workshops, festivals, and registration metadata |
+| `https://fass.nus.edu.sg/events` | HTML portal | validated | Live event taxonomy pages expose dated talks, workshops, festivals, and registration metadata; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
 | `https://fass.nus.edu.sg/cs/events` | HTML portal | candidate | Department-specific events |
-| `https://sph.nus.edu.sg/events` | HTML portal | validated | Live event detail pages include date, time, platform, and synopsis for public health talks and conferences |
+| `https://sph.nus.edu.sg/events` | HTML portal | validated | Live event detail pages include date, time, platform, and synopsis for public health talks and conferences; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
 | `https://medicine.nus.edu.sg/cbme/events` | HTML portal | candidate | Ethics events |
 | `https://medicine.nus.edu.sg/cbme/seminars-workshops-conferences` | HTML portal | candidate | Seminar-focused listing |
 | `https://csi.nus.edu.sg/events` | HTML portal | candidate | Research institute events |
@@ -59,14 +59,14 @@ Statuses used in this document:
 
 | Source | Type | Status | Notes |
 | --- | --- | --- | --- |
-| `https://osa.nus.edu.sg/events/` | HTML portal | validated | Strong source with filters for Arts, Sports, For Public, and upcoming date ranges; contains usable event cards |
-| `https://osa.nus.edu.sg/nusartsfestival/` | HTML festival site | validated | Live festival calendar includes dated performances by genre with individual event detail pages |
-| `https://museum.nus.edu.sg/` | HTML museum site | validated | Homepage exposes current events and exhibitions with event cards and dates |
+| `https://osa.nus.edu.sg/events/` | HTML portal | validated | Strong source with filters for Arts, Sports, For Public, and upcoming date ranges; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
+| `https://osa.nus.edu.sg/nusartsfestival/` | HTML festival site | validated | Live festival calendar includes dated performances by genre with individual event detail pages; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
+| `https://museum.nus.edu.sg/` | HTML museum site | validated | Homepage exposes current events and exhibitions with event cards and dates; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
 | `https://museum.nus.edu.sg/explore/about/` | Museum info page | candidate | Confirms museum role and public-facing gallery programming on campus |
-| `https://babahouse.nus.edu.sg/` | HTML heritage site | validated | Homepage exposes current events and exhibitions and links to programmes and tours |
+| `https://babahouse.nus.edu.sg/` | HTML heritage site | validated | Homepage exposes current events and exhibitions and links to programmes and tours; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
 | `https://babahouse.nus.edu.sg/explore/programmes/heritage-tours/` | HTML programme page | candidate | Heritage tours are event-like and publicly bookable |
 | `https://babahouse.nus.edu.sg/explore/programmes/saturdays-at-nus-baba-house/` | HTML programme page | candidate | Recurring cultural programmes and thematic public activities |
-| `https://lkcnhm.nus.edu.sg/` | HTML museum site | validated | Homepage includes “What’s on” plus tours and workshops sections suitable for cultural event discovery |
+| `https://lkcnhm.nus.edu.sg/` | HTML museum site | validated | Homepage includes “What’s on” plus tours and workshops sections suitable for cultural event discovery; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
 | `https://ystmusic.nus.edu.sg/whats-on` | HTML performance listing | candidate | High-value performing arts source from the seed list, but this specific page still needs direct parser validation |
 | `https://osa.nus.edu.sg/event/inter-faculty-games-ifg/` | HTML event page | candidate | Signature NUS athletics event; useful pattern for sports listings |
 | `https://osa.nus.edu.sg/event/inter-faculty-games-2024/` | HTML event page | candidate | Sports event detail template with date, venue, organiser, and audience fields |
@@ -85,14 +85,14 @@ Statuses used in this document:
 | `https://www.ntu.edu.sg/engineering/news-and-events/events` | HTML portal | candidate | College-level event listing |
 | `https://www.ntu.edu.sg/mae/news-events/events` | HTML portal | validated | Event detail pages include date, venue, audience, seminar metadata, and add-to-calendar support |
 | `https://www.ntu.edu.sg/mae/research/knowledge-portal/research-seminars-events` | HTML portal | candidate | Research seminar source |
-| `https://www.ntu.edu.sg/cceb/news-and-events/seminars-and-lecture-series` | HTML portal | validated | Strong seminar hub linking multiple seminar families with event detail pages and add-to-calendar metadata |
+| `https://www.ntu.edu.sg/cceb/news-and-events/seminars-and-lecture-series` | HTML portal | validated | Strong seminar hub linking multiple seminar families with event detail pages and add-to-calendar metadata; automation now uses the school’s live `GetEvents` feed for safer recurring ingestion |
 | `https://www.ntu.edu.sg/cceb/news-and-events/events` | HTML portal | candidate | School events |
-| `https://www.ntu.edu.sg/sbs/news-events/events` | HTML portal | validated | Search results confirm dedicated SBS event pages and a symposium microsite with programme and registration structure |
+| `https://www.ntu.edu.sg/sbs/news-events/events` | HTML portal | validated | Earlier URL now returns HTTP 404; use `https://www.ntu.edu.sg/sbs/news-and-events/events` as the working canonical replacement for automation |
 | `https://www.ntu.edu.sg/mse/news-events/events` | HTML portal | candidate | Materials science events |
 | `https://www.ntu.edu.sg/eee/news-and-events` | HTML portal | candidate | EEE exposes event-tagged pages and hackathons, but search results currently skew toward news recaps instead of a clean events index |
-| `https://www.ntu.edu.sg/cee/news-and-events/events` | HTML portal | validated | Distinguished seminar pages are live and include registration, categories, and event metadata |
+| `https://www.ntu.edu.sg/cee/news-and-events/events` | HTML portal | validated | Earlier URL now returns HTTP 404; use `https://www.ntu.edu.sg/cee/news-events/events?listingKeyword=&categories=all&interests=all&audiences=all&page=1` as the working canonical replacement for automation |
 | `https://www.ntu.edu.sg/business/news-and-events/events` | HTML portal | candidate | Business school pages surface workshop stories and events, but the clean canonical event listing needs more validation |
-| `https://www.ntu.edu.sg/ias/events` | HTML portal | validated | Search results confirm dedicated IAS event detail pages with dates, audiences, categories, and public-facing metadata |
+| `https://www.ntu.edu.sg/ias/events` | HTML portal | validated | Search results confirm dedicated IAS event detail pages with dates, audiences, categories, and public-facing metadata; automation now uses the page’s live `GetEvents` feed |
 | `https://www.ntu.edu.sg/research-seminars` | HTML portal | candidate | Central seminar page |
 | `https://www.ntu.edu.sg/engineering/research-seminars` | HTML portal | candidate | Engineering seminar page |
 
@@ -125,14 +125,14 @@ These are important because some event-rich organisations are hosted on campus, 
 | --- | --- | --- | --- | --- | --- |
 | NTU | SCELSE | `https://scelse.sg/news-events/all-events/` | HTML portal | validated | Live event page with category filters including conferences, seminar series, talks, presentations, outreach, and webinars |
 | NTU | SCELSE | `https://scelse.sg/about/who-we-are/` | About page | candidate | Confirms SCELSE is hosted at NTU and has shared NUS space |
-| NTU | ERI@N | `https://www.ntu.edu.sg/erian/news-events` | HTML portal | validated | News & Events page exposes upcoming events and links to a dedicated all-events listing |
-| NTU | IAS | `https://www.ntu.edu.sg/ias/events` | HTML portal | validated | Dedicated event records are visible in current search results and include event metadata suitable for parsing |
+| NTU | ERI@N | `https://www.ntu.edu.sg/erian/news-events` | HTML portal | validated | News & Events page exposes upcoming events and links to a dedicated all-events listing; automation now uses the institute’s live `GetEvents` feed |
+| NTU | IAS | `https://www.ntu.edu.sg/ias/events` | HTML portal | validated | Dedicated event records are visible in current search results and include event metadata suitable for parsing; automation now uses the page’s live `GetEvents` feed |
 | NUS | NERI | `https://www.nus.edu.sg/neri/events/eventsgallery/` | HTML portal | candidate | Event gallery is live and useful, but it appears archive-heavy; prefer an upcoming-events page if available |
 | NUS | CQT | `https://www.cqt.sg/` | Mixed site | candidate | Site is live and exposes Upcoming Events and Event Calendar navigation; use the direct upcoming-events page for parsing |
-| NUS | CQT | `https://www.cqt.sg/upcoming-events/` | HTML portal | validated | Direct upcoming-events page is live and should be preferred over the homepage |
+| NUS | CQT | `https://www.cqt.sg/upcoming-events/` | HTML portal | validated | Direct upcoming-events page is live and should be preferred over the homepage; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
 | NUS | SMART | `https://smart.mit.edu/` | Mixed site | candidate | Live site confirms SMART at CREATE and has News and Events sections, but direct upcoming event extraction needs more validation |
 | NUS | MBI | `https://mechanobio.info/` | Mixed site | rejected | Domain currently appears compromised and is not safe to treat as an official source |
-| NUS | MBI | `https://www.mbi.nus.edu.sg/mbi-seminar-workshop-series/` | HTML portal | validated | Canonical NUS-hosted MBI page lists seminar series, workshops, conferences, and current event links |
+| NUS | MBI | `https://www.mbi.nus.edu.sg/mbi-seminar-workshop-series/` | HTML portal | validated | Canonical NUS-hosted MBI page lists seminar series, workshops, conferences, and current event links; currently inactive in the automation registry because live fetches return an Incapsula challenge page |
 | NUS | SNRSI | `https://snrsi.nus.edu.sg/` | Mixed site | rejected | Institute homepage is live, but no clear public events or seminar listing was found in the first validation pass |
 
 ## Discovery Heuristic For Non-Department Sources
@@ -159,3 +159,6 @@ These are important because some event-rich organisations are hosted on campus, 
 - Added a dedicated category for campus-based institutes and agencies beyond core university departments, including SCELSE-like organisations.
 - Expanded the inventory with arts, performance, museum, gallery, and athletics sources on both campuses.
 - Completed a first validation pass for seed feeds, central event pages, arts and museum pages, and major institute sources.
+- Confirmed that `https://www.ntu.edu.sg/sbs/news-events/events` and `https://www.ntu.edu.sg/cee/news-and-events/events` return HTTP 404, then promoted working replacement URLs for SBS and CEE after direct live checks.
+- Confirmed that the currently inactive NUS HTML sources remain blocked by Incapsula from the automation environment, and no documented alternate machine-readable feed has been promoted yet.
+- Confirmed that likely alternate machine-readable paths for the inactive NUS HTML sources, including common WordPress `wp-json` routes on OSA, NUS Museum, FASS, and SSHSPH, are also blocked by the same Incapsula challenge from the automation environment.

@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import re
 from datetime import date, timedelta
+from zoneinfo import ZoneInfo
 
+from campus_events.config import SINGAPORE_TIMEZONE
 from campus_events.models import Event
 
 
@@ -23,7 +25,8 @@ EXCLUDED_TITLE_PATTERNS = [
 
 def filter_events(events: list[Event], run_date: date) -> list[Event]:
     kept: list[Event] = []
-    stale_cutoff = run_date - timedelta(days=1)
+    window_end = run_date + timedelta(days=7)
+    singapore_tz = ZoneInfo(SINGAPORE_TIMEZONE)
     for event in events:
         title = event.title.strip()
         if not title:
@@ -32,7 +35,10 @@ def filter_events(events: list[Event], run_date: date) -> list[Event]:
             continue
         if event.audience_hint == "campus_only":
             continue
-        if event.start and event.start.date() < stale_cutoff:
+        if event.start is None:
+            continue
+        event_date = event.start.astimezone(singapore_tz).date()
+        if event_date < run_date or event_date > window_end:
             continue
         kept.append(event)
     return kept

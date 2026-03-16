@@ -3,6 +3,7 @@ generated_on: 2026-03-16
 notes:
   - This registry includes only sources currently marked validated in SOURCES.md.
   - Discovery-only and candidate sources stay in SOURCES.md until they are promoted.
+  - Sources that are currently unreachable or blocked by upstream challenge pages are marked inactive for automation safety.
 sources:
   - id: nus_coe_rss_directory
     campus: NUS
@@ -51,7 +52,7 @@ sources:
       - sports
       - public_events
     priority: high
-    active: true
+    active: false
     trust_level: validated
 
   - id: nus_arts_festival
@@ -68,7 +69,7 @@ sources:
       - plays
       - festivals
     priority: high
-    active: true
+    active: false
     trust_level: validated
 
   - id: nus_museum
@@ -84,7 +85,7 @@ sources:
       - gallery_events
       - talks
     priority: high
-    active: true
+    active: false
     trust_level: validated
 
   - id: nus_baba_house
@@ -100,7 +101,7 @@ sources:
       - tours
       - cultural_programmes
     priority: medium
-    active: true
+    active: false
     trust_level: validated
 
   - id: nus_lkcnhm
@@ -116,7 +117,7 @@ sources:
       - tours
       - workshops
     priority: medium
-    active: true
+    active: false
     trust_level: validated
 
   - id: nus_fass_events
@@ -132,7 +133,7 @@ sources:
       - workshops
       - festivals
     priority: medium
-    active: true
+    active: false
     trust_level: validated
 
   - id: nus_sph_events
@@ -148,7 +149,7 @@ sources:
       - conferences
       - seminars
     priority: medium
-    active: true
+    active: false
     trust_level: validated
 
   - id: nus_math_events
@@ -164,7 +165,7 @@ sources:
       - conferences
       - seminars
     priority: medium
-    active: true
+    active: false
     trust_level: validated
 
   - id: nus_cqt_upcoming_events
@@ -180,7 +181,7 @@ sources:
       - workshops
       - conferences
     priority: high
-    active: true
+    active: false
     trust_level: validated
 
   - id: nus_mbi_seminar_series
@@ -196,7 +197,7 @@ sources:
       - workshops
       - conferences
     priority: high
-    active: true
+    active: false
     trust_level: validated
 
   - id: ntu_main_events
@@ -282,7 +283,7 @@ sources:
     campus: NTU
     organisation: School of Biological Sciences
     governance: school
-    url: https://www.ntu.edu.sg/sbs/news-events/events
+    url: https://www.ntu.edu.sg/sbs/news-and-events/events
     source_kind: html
     parser_family: ntu_event_detail_listing
     fixture_slug: ntu_sbs_events
@@ -298,7 +299,7 @@ sources:
     campus: NTU
     organisation: School of Civil and Environmental Engineering
     governance: school
-    url: https://www.ntu.edu.sg/cee/news-and-events/events
+    url: https://www.ntu.edu.sg/cee/news-events/events?listingKeyword=&categories=all&interests=all&audiences=all&page=1
     source_kind: html
     parser_family: ntu_event_detail_listing
     fixture_slug: ntu_cee_events

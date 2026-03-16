@@ -1,13 +1,26 @@
 import unittest
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
+
+import yaml
 
 from campus_events.delivery import DeliveryLedger
 from campus_events.fetchers import FetchResult
 from campus_events.models import Event
 from campus_events.pipeline import run_pipeline
+
+
+def write_test_registry(tmp_dir: str, active_source_ids: set[str]) -> str:
+    registry_path = Path("source_registry.yaml")
+    payload = yaml.safe_load(registry_path.read_text(encoding="utf-8"))
+    for source in payload["sources"]:
+        source["active"] = source["id"] in active_source_ids
+    output_path = Path(tmp_dir) / "test_registry.yaml"
+    output_path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    return str(output_path)
 
 
 class PipelineTests(unittest.TestCase):
@@ -33,9 +46,9 @@ class PipelineTests(unittest.TestCase):
         event = Event(
             title="Talk",
             summary="Summary",
-            start=None,
+            start=datetime(2026, 3, 16, 10, 0, tzinfo=ZoneInfo("Asia/Singapore")),
             end=None,
-            timezone="",
+            timezone="Asia/Singapore",
             venue="Venue",
             campus="NUS",
             institution="NUS",
@@ -74,6 +87,82 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue(report.digest_generated)
         self.assertTrue(report.duplicate_detected)
 
+    def test_filter_limits_events_to_today_through_next_seven_days(self) -> None:
+        within_window = Event(
+            title="Within Window",
+            summary="Summary",
+            start=datetime(2026, 3, 23, 10, 0, tzinfo=ZoneInfo("UTC")),
+            end=None,
+            timezone="UTC",
+            venue="Venue",
+            campus="NUS",
+            institution="NUS",
+            organiser="NUS",
+            source_name="source",
+            source_url="https://example.com/within",
+            category="talks",
+            audience_hint="public",
+            tags=["talks"],
+        )
+        out_of_window = Event(
+            title="Too Far Ahead",
+            summary="Summary",
+            start=datetime(2026, 3, 24, 0, 1, tzinfo=ZoneInfo("Asia/Singapore")),
+            end=None,
+            timezone="Asia/Singapore",
+            venue="Venue",
+            campus="NUS",
+            institution="NUS",
+            organiser="NUS",
+            source_name="source",
+            source_url="https://example.com/outside",
+            category="talks",
+            audience_hint="public",
+            tags=["talks"],
+        )
+        undated = Event(
+            title="Undated",
+            summary="Summary",
+            start=None,
+            end=None,
+            timezone="",
+            venue="Venue",
+            campus="NUS",
+            institution="NUS",
+            organiser="NUS",
+            source_name="source",
+            source_url="https://example.com/undated",
+            category="talks",
+            audience_hint="public",
+            tags=["talks"],
+        )
+
+        with TemporaryDirectory() as tmp_dir:
+            registry_path = write_test_registry(tmp_dir, {"rsis_event_rss"})
+            with patch("campus_events.pipeline.fetch_source") as fetch_mock, patch(
+                "campus_events.pipeline.parse_source"
+            ) as parse_mock:
+                fetch_mock.return_value.ok = True
+                fetch_mock.return_value.content = "<html></html>"
+                fetch_mock.return_value.error = None
+                parse_mock.return_value = [within_window, out_of_window, undated]
+                report = run_pipeline(
+                    registry_path=registry_path,
+                    run_date=date(2026, 3, 16),
+                    recipient="erichill27@gmail.com",
+                    mode="dry-run",
+                    output_root=str(Path(tmp_dir) / "runs"),
+                    state_root=str(Path(tmp_dir) / "state"),
+                )
+            self.assertEqual(report.status, "dry_run_valid")
+            self.assertEqual(report.filtered_count, 1)
+            self.assertEqual(report.deduped_count, 1)
+            self.assertIsNotNone(report.digest_path)
+            digest_text = Path(report.digest_path).read_text(encoding="utf-8")
+            self.assertIn("Within Window", digest_text)
+            self.assertNotIn("Too Far Ahead", digest_text)
+            self.assertNotIn("Undated", digest_text)
+
     def test_dry_run_generates_digest_from_saved_rss_fixture(self) -> None:
         fixture_path = Path("tests/fixtures/rsis_event_rss_sample_2026-03-16.xml")
         fixture_content = fixture_path.read_text(encoding="utf-8")
@@ -94,9 +183,10 @@ class PipelineTests(unittest.TestCase):
             )
 
         with TemporaryDirectory() as tmp_dir:
+            registry_path = write_test_registry(tmp_dir, {"rsis_event_rss"})
             with patch("campus_events.pipeline.fetch_source", side_effect=fake_fetch):
                 report = run_pipeline(
-                    registry_path="source_registry.yaml",
+                    registry_path=registry_path,
                     run_date=date(2026, 3, 16),
                     recipient="erichill27@gmail.com",
                     mode="dry-run",
@@ -147,9 +237,10 @@ class PipelineTests(unittest.TestCase):
             )
 
         with TemporaryDirectory() as tmp_dir:
+            registry_path = write_test_registry(tmp_dir, {"rsis_event_rss", "nus_osa_events"})
             with patch("campus_events.pipeline.fetch_source", side_effect=fake_fetch):
                 report = run_pipeline(
-                    registry_path="source_registry.yaml",
+                    registry_path=registry_path,
                     run_date=date(2026, 3, 16),
                     recipient="erichill27@gmail.com",
                     mode="dry-run",
@@ -210,9 +301,12 @@ class PipelineTests(unittest.TestCase):
             )
 
         with TemporaryDirectory() as tmp_dir:
+            registry_path = write_test_registry(
+                tmp_dir, {"rsis_event_rss", "nus_osa_events", "nus_museum"}
+            )
             with patch("campus_events.pipeline.fetch_source", side_effect=fake_fetch):
                 report = run_pipeline(
-                    registry_path="source_registry.yaml",
+                    registry_path=registry_path,
                     run_date=date(2026, 3, 16),
                     recipient="erichill27@gmail.com",
                     mode="dry-run",
@@ -269,9 +363,13 @@ class PipelineTests(unittest.TestCase):
             )
 
         with TemporaryDirectory() as tmp_dir:
+            registry_path = write_test_registry(
+                tmp_dir,
+                {"rsis_event_rss", "nus_osa_events", "nus_museum", "ntu_scelse_all_events"},
+            )
             with patch("campus_events.pipeline.fetch_source", side_effect=fake_fetch):
                 report = run_pipeline(
-                    registry_path="source_registry.yaml",
+                    registry_path=registry_path,
                     run_date=date(2026, 3, 16),
                     recipient="erichill27@gmail.com",
                     mode="dry-run",
@@ -281,12 +379,12 @@ class PipelineTests(unittest.TestCase):
 
             self.assertEqual(report.status, "dry_run_valid")
             self.assertEqual(report.candidate_count, 11)
-            self.assertEqual(report.filtered_count, 8)
-            self.assertEqual(report.deduped_count, 7)
+            self.assertEqual(report.filtered_count, 6)
+            self.assertEqual(report.deduped_count, 5)
             self.assertIsNotNone(report.digest_path)
             digest_text = Path(report.digest_path).read_text(encoding="utf-8")
-            self.assertIn("Microbial Cities Symposium", digest_text)
-            self.assertIn("Lab Open House Guided Tour", digest_text)
+            self.assertNotIn("Microbial Cities Symposium", digest_text)
+            self.assertNotIn("Lab Open House Guided Tour", digest_text)
             self.assertNotIn("Internal Instrument Training", digest_text)
 
     def test_dry_run_generates_digest_across_all_implemented_parser_families(self) -> None:
@@ -340,9 +438,34 @@ class PipelineTests(unittest.TestCase):
             )
 
         with TemporaryDirectory() as tmp_dir:
+            registry_path = write_test_registry(
+                tmp_dir,
+                {
+                    "nus_coe_rss_directory",
+                    "rsis_event_rss",
+                    "nus_osa_events",
+                    "nus_museum",
+                    "ntu_scelse_all_events",
+                    "nus_arts_festival",
+                    "nus_baba_house",
+                    "nus_fass_events",
+                    "nus_sph_events",
+                    "nus_math_events",
+                    "nus_cqt_upcoming_events",
+                    "nus_mbi_seminar_series",
+                    "ntu_main_events",
+                    "ntu_ias_events",
+                    "ntu_mae_events",
+                    "ntu_sbs_events",
+                    "ntu_cee_events",
+                    "ntu_museum_exhibitions",
+                    "ntu_cceb_seminars",
+                    "ntu_erian_news_events",
+                },
+            )
             with patch("campus_events.pipeline.fetch_source", side_effect=fake_fetch):
                 report = run_pipeline(
-                    registry_path="source_registry.yaml",
+                    registry_path=registry_path,
                     run_date=date(2026, 3, 16),
                     recipient="erichill27@gmail.com",
                     mode="dry-run",
@@ -352,12 +475,13 @@ class PipelineTests(unittest.TestCase):
 
             self.assertEqual(report.status, "dry_run_valid")
             self.assertGreaterEqual(report.candidate_count, 25)
-            self.assertGreaterEqual(report.filtered_count, 21)
-            self.assertGreaterEqual(report.deduped_count, 18)
+            self.assertGreaterEqual(report.filtered_count, 6)
+            self.assertGreaterEqual(report.deduped_count, 5)
             self.assertIsNotNone(report.digest_path)
             digest_text = Path(report.digest_path).read_text(encoding="utf-8")
-            self.assertIn("Energy Resilience Dialogue", digest_text)
-            self.assertIn("NTU Innovation Day", digest_text)
-            self.assertIn("Quantum Sensing Workshop", digest_text)
-            self.assertIn("Campus Arts Festival Night", digest_text)
-            self.assertIn("Campus Chamber Concert", digest_text)
+            self.assertNotIn("Energy Resilience Dialogue", digest_text)
+            self.assertNotIn("NTU Innovation Day", digest_text)
+            self.assertNotIn("Quantum Sensing Workshop", digest_text)
+            self.assertIn("Regional Security Seminar: Maritime Futures", digest_text)
+            self.assertNotIn("Campus Arts Festival Night", digest_text)
+            self.assertNotIn("Campus Chamber Concert", digest_text)

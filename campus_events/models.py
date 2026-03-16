@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from datetime import date, datetime
+from datetime import UTC, date, datetime
 
 
 @dataclass(slots=True)
@@ -62,7 +62,7 @@ class Event:
         return normalized_title, event_date, normalized_venue
 
     def sort_key(self) -> tuple[datetime, str, str]:
-        sort_start = self.start or datetime.max
+        sort_start = self.start or datetime.max.replace(tzinfo=UTC)
         return sort_start, self.campus, self.title.lower()
 
 
