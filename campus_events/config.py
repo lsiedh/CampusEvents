@@ -7,6 +7,7 @@ from pathlib import Path
 
 EXPECTED_INITIAL_RECIPIENT = "erichill27@gmail.com"
 SINGAPORE_TIMEZONE = "Asia/Singapore"
+LOCAL_ENV_FILES = (".env.local", ".env")
 
 
 @dataclass(slots=True)
@@ -54,7 +55,22 @@ def load_delivery_config() -> DeliveryConfig:
     )
 
 
+def load_local_env(base_dir: str | Path = ".") -> None:
+    root = Path(base_dir)
+    for name in LOCAL_ENV_FILES:
+        env_path = root / name
+        if not env_path.exists():
+            continue
+        for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+            line = raw_line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip().strip("'\"")
+            os.environ.setdefault(key, value)
+
+
 def ensure_directory(path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True)
     return path
-

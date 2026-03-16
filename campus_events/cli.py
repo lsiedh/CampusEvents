@@ -4,7 +4,7 @@ import argparse
 import sys
 from datetime import date
 
-from campus_events.config import EXPECTED_INITIAL_RECIPIENT
+from campus_events.config import EXPECTED_INITIAL_RECIPIENT, load_local_env
 from campus_events.pipeline import default_run_date, report_to_console_text, run_pipeline
 
 
@@ -51,6 +51,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    load_local_env()
     parser = build_parser()
     args = parser.parse_args(argv)
     mode = "deliver" if args.deliver else "dry-run"
@@ -71,4 +72,3 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv[1:]))
-
